@@ -68,18 +68,59 @@ for (let i = 0; i < POINTS.length - 1; i++) {
 }
 
 
+// Convert radians to degrees for display
+function radToDeg(rad) {
+    return Math.round((rad * 180 / Math.PI + 360) % 360);
+}
+
+function displayCoordinates(ctx) {
+    // Set up text display properties
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "14px Arial";
+
+    const padding = 20;
+    let y = padding;
+    const lineHeight = 20;
+
+    // Display anchor point coordinates
+    const anchor = ARMS[0].startJoint;
+    ctx.fillText(`Anchor: (${Math.round(anchor.x)}, ${Math.round(anchor.y)})`, padding, y);
+    y += lineHeight;
+
+    // Display end point coordinates
+    const end = ARMS[ARMS.length-1].endJoint;
+    ctx.fillText(`End: (${Math.round(end.x)}, ${Math.round(end.y)})`, padding, y);
+    y += lineHeight;
+
+    // Display target coordinates if available
+    if (MOUSE_POSITION !== null) {
+        ctx.fillText(`Target: (${Math.round(MOUSE_POSITION[0])}, ${Math.round(MOUSE_POSITION[1])})`, padding, y);
+    }
+}
 
 function drawFrame() {
     ctx.fillStyle = "#100707";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ARMS.forEach((joint) => {
-        joint.draw(ctx);
-    });
+    ARMS.forEach((arm) => {
+        arm.draw(ctx);
 
+        // Display arm angle
+        const angle = arm.getAngle();
+        const degrees = radToDeg(angle);
+        const midX = (arm.startJoint.x + arm.endJoint.x) / 2;
+        const midY = (arm.startJoint.y + arm.endJoint.y) / 2;
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "14px Arial";
+        ctx.fillText(`${degrees}°`, midX + 15, midY - 10);
+    });
+    // Display coordinates in corner
+    displayCoordinates(ctx);
+
+    // Position arms if target is available
     if (MOUSE_POSITION !== null) {
         const target = new Point(MOUSE_POSITION[0], MOUSE_POSITION[1]);
-        positionWithArms(ARMS, target)
+        positionWithArms(ARMS, target);
     }
 }
 
